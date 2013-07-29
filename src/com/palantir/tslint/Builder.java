@@ -85,10 +85,10 @@ public class Builder extends IncrementalProjectBuilder {
 
 				String resourceFullPathString = resource.getRawLocation()
 						.toOSString();
+				String tslintrcString = getProject().getFile(".tslintrc").getRawLocation().toOSString();
 				// start tslint and get its output
 				ProcessBuilder processBuilder = new ProcessBuilder(tslintPath,
-						"-f", resourceFullPathString, "-t", "json", "-c",
-						"/Users/mmiller/Documents/runtime-EclipseApplication/test/.tslintrc");
+						"-f", resourceFullPathString, "-t", "json", "-c", tslintrcString);
 
 				// TODO: Take out the platform specific hack
 				Map<String, String> processBuilderEnvironment = processBuilder
