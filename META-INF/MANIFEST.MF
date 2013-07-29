@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: CheckTypeScriptStyle
+Bundle-SymbolicName: com.palantir.tslint;singleton:=true
+Bundle-Version: 0.0.1
+Bundle-Activator: com.palantir.tslint.Activator
+Bundle-Vendor: Palantir Technologies
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.core.resources
