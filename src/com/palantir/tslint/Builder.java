@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
@@ -57,13 +58,26 @@ public class Builder extends IncrementalProjectBuilder {
 
 	static class RuleViolation {
 		static class Position {
-			public int character;
-			public int line;
+			private int character;
+			private int line;
+
+			public Position(@JsonProperty("character") int character, @JsonProperty("line") int line) {
+				this.character = character;
+				this.line = line;
+			}
 		}
 
-		public String failure;
-		public String name;
-		public Position position;
+		private String failure;
+		private String name;
+		private Position position;
+
+		public RuleViolation(@JsonProperty("failure") String failure,
+				@JsonProperty("name") String name,
+				@JsonProperty("position") Position position) {
+			this.failure = failure;
+			this.name = name;
+			this.position = position;
+		}
 	}
 
 	private static final String MARKER_TYPE = "com.palantir.tslint.tslintProblem";
@@ -85,10 +99,12 @@ public class Builder extends IncrementalProjectBuilder {
 
 				String resourceFullPathString = resource.getRawLocation()
 						.toOSString();
-				String tslintrcString = getProject().getFile(".tslintrc").getRawLocation().toOSString();
+				String tslintrcString = getProject().getFile(".tslintrc")
+						.getRawLocation().toOSString();
 				// start tslint and get its output
 				ProcessBuilder processBuilder = new ProcessBuilder(tslintPath,
-						"-f", resourceFullPathString, "-t", "json", "-c", tslintrcString);
+						"-f", resourceFullPathString, "-t", "json", "-c",
+						tslintrcString);
 
 				// TODO: Take out the platform specific hack
 				Map<String, String> processBuilderEnvironment = processBuilder
