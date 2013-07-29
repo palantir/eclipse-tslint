@@ -1,0 +1,7 @@
+{
+  "name": "eclipse-tslint",
+  "version": "0.0.1",
+  "dependencies": {
+    "tslint": "~0.1.1"
+  }
+}

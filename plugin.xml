@@ -20,7 +20,7 @@
      id="checkTypeScriptStyleBuilder" name="Check TypeScript Style Builder" point="org.eclipse.core.resources.builders">
      <builder>
         <run
-           class="com.palantir.tslint.CheckTypeScriptStyleBuilder">
+           class="com.palantir.tslint.EclipseTSLintBuilder">
         </run>
      </builder>
   </extension>
