@@ -18,7 +18,6 @@ public class TSLintPlugin extends AbstractUIPlugin {
 	 * The constructor
 	 */
 	public TSLintPlugin() {
-		System.out.println("INITIALIZATION");
 	}
 
 	/*
@@ -29,7 +28,6 @@ public class TSLintPlugin extends AbstractUIPlugin {
 	 * )
 	 */
 	public void start(BundleContext context) throws Exception {
-		System.out.println("START");
 		super.start(context);
 		plugin = this;
 

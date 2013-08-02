@@ -1,10 +1,11 @@
 package com.palantir.tslint;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.List;
 import java.util.Map;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -14,102 +15,178 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.ui.texteditor.MarkerUtilities;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Charsets;
+import com.google.common.collect.Maps;
 
 public class Builder extends IncrementalProjectBuilder {
 
-	class SampleDeltaVisitor implements IResourceDeltaVisitor {
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.core.resources.IResourceDeltaVisitor#visit(org.eclipse.core.resources.IResourceDelta)
-		 */
+	class DeltaVisitor implements IResourceDeltaVisitor {
 		public boolean visit(IResourceDelta delta) throws CoreException {
 			IResource resource = delta.getResource();
 			switch (delta.getKind()) {
 			case IResourceDelta.ADDED:
-				// handle added resource
-				checkXML(resource);
-				break;
-			case IResourceDelta.REMOVED:
-				// handle removed resource
-				break;
 			case IResourceDelta.CHANGED:
-				// handle changed resource
-				checkXML(resource);
+				lint(resource);
 				break;
 			}
-			//return true to continue visiting children.
+			// return true to continue visiting children.
 			return true;
 		}
 	}
 
-	class SampleResourceVisitor implements IResourceVisitor {
+	class ResourceVisitor implements IResourceVisitor {
 		public boolean visit(IResource resource) {
-			checkXML(resource);
-			//return true to continue visiting children.
+			lint(resource);
 			return true;
 		}
 	}
 
-	class XMLErrorHandler extends DefaultHandler {
-		
-		private IFile file;
+	static class FilePosition {
+		private int character;
+		private int line;
+		private int position;
 
-		public XMLErrorHandler(IFile file) {
-			this.file = file;
+		public FilePosition(@JsonProperty("character") int character,
+				@JsonProperty("line") int line,
+				@JsonProperty("position") int position) {
+			this.character = character;
+			this.line = line;
+			this.position = position;
 		}
+	}
 
-		private void addMarker(SAXParseException e, int severity) {
-			Builder.this.addMarker(file, e.getMessage(), e
-					.getLineNumber(), severity);
+	static class FailurePosition {
+		private FilePosition start;
+		private FilePosition end;
+
+		public FailurePosition(@JsonProperty("start") FilePosition start,
+				@JsonProperty("end") FilePosition end) {
+			this.start = start;
+			this.end = end;
 		}
+	}
 
-		public void error(SAXParseException exception) throws SAXException {
-			addMarker(exception, IMarker.SEVERITY_ERROR);
-		}
+	static class RuleViolation {
+		private String failure;
+		private String name;
+		private FailurePosition position;
 
-		public void fatalError(SAXParseException exception) throws SAXException {
-			addMarker(exception, IMarker.SEVERITY_ERROR);
-		}
-
-		public void warning(SAXParseException exception) throws SAXException {
-			addMarker(exception, IMarker.SEVERITY_WARNING);
+		public RuleViolation(@JsonProperty("failure") String failure,
+				@JsonProperty("name") String name,
+				@JsonProperty("failurePosition") FailurePosition position) {
+			this.failure = failure;
+			this.name = name;
+			this.position = position;
 		}
 	}
 
 	public static final String BUILDER_ID = "com.palantir.tslint.tslintBuilder";
 
-	private static final String MARKER_TYPE = "com.palantir.tslint.xmlProblem";
+	private static final String MARKER_TYPE = "com.palantir.tslint.tslintProblem";
 
-	private SAXParserFactory parserFactory;
+	void lint(IResource resource) {
+		if (resource instanceof IFile && resource.getName().endsWith(".ts")) {
+			IFile file = (IFile) resource;
 
-	private void addMarker(IFile file, String message, int lineNumber,
-			int severity) {
-		try {
-			IMarker marker = file.createMarker(MARKER_TYPE);
-			marker.setAttribute(IMarker.MESSAGE, message);
-			marker.setAttribute(IMarker.SEVERITY, severity);
-			if (lineNumber == -1) {
-				lineNumber = 1;
+			deleteMarkers(file);
+
+			try {
+				File bundleFile;
+				bundleFile = FileLocator.getBundleFile(TSLintPlugin
+						.getDefault().getBundle());
+
+				File tslintFile = new File(bundleFile,
+						"node_modules/tslint/bin/tslint");
+				String tslintPath = tslintFile.getAbsolutePath();
+
+				String resourceFullPathString = resource.getRawLocation()
+						.toOSString();
+				String tslintrcString = getProject().getFile(".tslintrc")
+						.getRawLocation().toOSString();
+				// start tslint and get its output
+				ProcessBuilder processBuilder = new ProcessBuilder(tslintPath,
+						"-f", resourceFullPathString, "-t", "json", "-c",
+						tslintrcString);
+
+				// TODO: Take out the platform specific hack
+				Map<String, String> processBuilderEnvironment = processBuilder
+						.environment();
+				String path = processBuilderEnvironment.get("PATH");
+				if (path.length() != 0) {
+					path = path + ":";
+				}
+				path = path + "/usr/local/bin";
+				processBuilderEnvironment.put("PATH", path);
+
+				Process process = processBuilder.start();
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(process.getInputStream(),
+								Charsets.UTF_8));
+				String jsonString = reader.readLine();
+
+				// Terminate process now that we have the complete output
+				process.destroy();
+
+				if (jsonString == null) {
+					// If there are no errors, short-circuit so Jackson doesn't
+					// trip up
+					return;
+				}
+
+				ObjectMapper objectMapper = new ObjectMapper();
+
+				RuleViolation[] ruleViolations = objectMapper.readValue(
+						jsonString, RuleViolation[].class);
+				for (RuleViolation ruleViolation : ruleViolations) {
+					addMarker(ruleViolation);
+				}
+
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-			marker.setAttribute(IMarker.LINE_NUMBER, lineNumber);
+		}
+	}
+
+	private void addMarker(RuleViolation ruleViolation) {
+		try {
+			Path path = new Path(ruleViolation.name);
+			IFile file = ResourcesPlugin.getWorkspace().getRoot()
+					.getFileForLocation(path);
+
+			Map<String, Object> attributes = Maps.newHashMap();
+
+			FilePosition startPosition = ruleViolation.position.start;
+			FilePosition endPosition = ruleViolation.position.end;
+
+			attributes.put(IMarker.LINE_NUMBER, startPosition.line);
+			attributes.put(IMarker.CHAR_START, startPosition.position);
+			attributes.put(IMarker.CHAR_END, endPosition.position);
+			attributes.put(IMarker.MESSAGE, ruleViolation.failure);
+			attributes.put(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
+			attributes.put(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+			MarkerUtilities.createMarker(file, attributes, MARKER_TYPE);
 		} catch (CoreException e) {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.core.internal.events.InternalBuilder#build(int,
-	 *      java.util.Map, org.eclipse.core.runtime.IProgressMonitor)
-	 */
-	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
-			throws CoreException {
+	private void deleteMarkers(IFile file) {
+		try {
+			file.deleteMarkers(MARKER_TYPE, false, IResource.DEPTH_ZERO);
+		} catch (CoreException ce) {
+		}
+	}
+
+	protected IProject[] build(int kind, Map<String, String> args,
+			IProgressMonitor monitor) throws CoreException {
 		if (kind == FULL_BUILD) {
 			fullBuild(monitor);
 		} else {
@@ -128,44 +205,17 @@ public class Builder extends IncrementalProjectBuilder {
 		getProject().deleteMarkers(MARKER_TYPE, true, IResource.DEPTH_INFINITE);
 	}
 
-	void checkXML(IResource resource) {
-		if (resource instanceof IFile && resource.getName().endsWith(".xml")) {
-			IFile file = (IFile) resource;
-			deleteMarkers(file);
-			XMLErrorHandler reporter = new XMLErrorHandler(file);
-			try {
-				getParser().parse(file.getContents(), reporter);
-			} catch (Exception e1) {
-			}
-		}
-	}
-
-	private void deleteMarkers(IFile file) {
-		try {
-			file.deleteMarkers(MARKER_TYPE, false, IResource.DEPTH_ZERO);
-		} catch (CoreException ce) {
-		}
-	}
-
 	protected void fullBuild(final IProgressMonitor monitor)
 			throws CoreException {
 		try {
-			getProject().accept(new SampleResourceVisitor());
+			getProject().accept(new ResourceVisitor());
 		} catch (CoreException e) {
 		}
-	}
-
-	private SAXParser getParser() throws ParserConfigurationException,
-			SAXException {
-		if (parserFactory == null) {
-			parserFactory = SAXParserFactory.newInstance();
-		}
-		return parserFactory.newSAXParser();
 	}
 
 	protected void incrementalBuild(IResourceDelta delta,
 			IProgressMonitor monitor) throws CoreException {
 		// the visitor does the work.
-		delta.accept(new SampleDeltaVisitor());
+		delta.accept(new DeltaVisitor());
 	}
 }
