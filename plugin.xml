@@ -16,24 +16,112 @@
   limitations under the License.
 -->
 <plugin>
-  <extension
-     id="builder" name="Check TypeScript Style Builder" point="org.eclipse.core.resources.builders">
-     <builder>
-        <run
-           class="com.palantir.tslint.Builder">
-        </run>
-     </builder>
-  </extension>
+	 <extension
+	    id="tslintBuilder" name="TSLint Project Builder" point="org.eclipse.core.resources.builders">
+	    <builder
+	          hasNature="true">
+	       <run
+	             class="com.palantir.tslint.Builder">
+	       </run>
+	    </builder>
+	 </extension>
 
      <extension
-         id="tslintProblem"
-         name="tslint Problem"
-         point="org.eclipse.core.resources.markers">
-      <super
-            type="org.eclipse.core.resources.problemmarker">
-      </super>
-      <persistent
-            value="true">
-      </persistent>
-   </extension>
+           id="tslintProblem"
+           name="TSLint Problem"
+           point="org.eclipse.core.resources.markers">
+        <super
+              type="org.eclipse.core.resources.problemmarker">
+        </super>
+        <persistent
+              value="true">
+        </persistent>
+     </extension>
+
+     <extension
+           id="tslintNature"
+           name="TSLint Project Nature"
+           point="org.eclipse.core.resources.natures">
+        <runtime>
+           <run
+                 class="com.palantir.tslint.ProjectNature">
+           </run>
+        </runtime>
+        <builder
+              id="com.palantir.tslint.tslintBuilder">
+        </builder>
+     </extension>
+
+     <extension
+           point="org.eclipse.ui.commands">
+        <category
+              id="com.palantir.tslint.tslintNature.category"
+              name="TSLint Project Nature commands">
+        </category>
+        <command
+              categoryId="com.palantir.tslint.tslintNature.category"
+              defaultHandler="com.palantir.tslint.AddRemoveProjectNatureHandler"
+              id="com.palantir.tslint.addRemoveProjectNature"
+              name="Add/RemoveTSLint Project Nature">
+        </command>
+     </extension>
+
+     <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">
+           <command
+                 commandId="com.palantir.tslint.addRemoveProjectNature"
+                 label="Disable TSLint builder"
+                 style="push">
+              <visibleWhen
+                    checkEnabled="false">
+                 <with
+                       variable="selection">
+                    <count
+                          value="1">
+                    </count>
+                    <iterate>
+                       <and>
+                          <instanceof
+                                value="org.eclipse.core.resources.IProject">
+                          </instanceof>
+                          <test
+                                property="org.eclipse.core.resources.projectNature"
+                                value="com.palantir.tslint.tslintNature">
+                          </test>
+                       </and>
+                    </iterate>
+                 </with>
+              </visibleWhen>
+           </command>
+           <command
+                 commandId="com.palantir.tslint.addRemoveProjectNature"
+                 label="Enable TSLint builder"
+                 style="push">
+              <visibleWhen
+                    checkEnabled="false">
+                 <with
+                       variable="selection">
+                    <count
+                          value="1">
+                    </count>
+                    <iterate>
+                       <and>
+                          <instanceof
+                                value="org.eclipse.core.resources.IProject">
+                          </instanceof>
+                          <not>
+                             <test
+                                   property="org.eclipse.core.resources.projectNature"
+                                   value="com.palantir.tslint.tslintNature">
+                             </test>
+                          </not>
+                       </and>
+                    </iterate>
+                 </with>
+              </visibleWhen>
+           </command>
+        </menuContribution>
+     </extension>
 </plugin>

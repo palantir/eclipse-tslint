@@ -8,7 +8,8 @@ Bundle-Vendor: Palantir Technologies
 Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.editors,
  org.eclipse.core.runtime,
- org.eclipse.equinox.registry
+ org.eclipse.equinox.registry,
+ org.eclipse.core.resources
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.core.resources
