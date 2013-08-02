@@ -58,24 +58,28 @@ public class Builder extends IncrementalProjectBuilder {
 
 	static class RuleViolation {
 		static class Position {
-			private int character;
-			private int line;
+			private int start;
+			private int end;
 
-			public Position(@JsonProperty("character") int character, @JsonProperty("line") int line) {
-				this.character = character;
-				this.line = line;
+			public Position(@JsonProperty("start") int start,
+					@JsonProperty("end") int end) {
+				this.start = start;
+				this.end = end;
 			}
 		}
 
 		private String failure;
 		private String name;
+		private int lineMarker;
 		private Position position;
 
 		public RuleViolation(@JsonProperty("failure") String failure,
 				@JsonProperty("name") String name,
+				@JsonProperty("lineMarker") int lineMarker,
 				@JsonProperty("position") Position position) {
 			this.failure = failure;
 			this.name = name;
+			this.lineMarker = lineMarker;
 			this.position = position;
 		}
 	}
@@ -155,7 +159,9 @@ public class Builder extends IncrementalProjectBuilder {
 
 			Map<String, Object> attributes = Maps.newHashMap();
 
-			attributes.put(IMarker.LINE_NUMBER, position.line + 1);
+			attributes.put(IMarker.LINE_NUMBER, ruleViolation.lineMarker);
+			attributes.put(IMarker.CHAR_START, position.start);
+			attributes.put(IMarker.CHAR_END, position.end);
 			attributes.put(IMarker.MESSAGE, ruleViolation.failure);
 			attributes.put(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
 			attributes.put(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
