@@ -105,7 +105,7 @@ public class Builder extends IncrementalProjectBuilder {
 						.getDefault().getBundle());
 
 				File tslintFile = new File(bundleFile,
-						"node_modules/tslint/bin/tslint");
+						"../node_modules/tslint/bin/tslint");
 				String tslintPath = tslintFile.getAbsolutePath();
 
 				String resourceFullPathString = resource.getRawLocation()
