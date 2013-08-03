@@ -14,24 +14,11 @@ import org.osgi.framework.BundleContext;
 public class TSLintPlugin extends AbstractUIPlugin {
 
     // The plug-in ID
-    public static final String PLUGIN_ID = "CheckTypeScriptStyle"; //$NON-NLS-1$
+    public static final String PLUGIN_ID = "CheckTypeScriptStyle";
 
     // The shared instance
     private static TSLintPlugin plugin;
 
-    /**
-     * The constructor
-     */
-    public TSLintPlugin() {
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext
-     * )
-     */
     @Override
     public void start(BundleContext context) throws Exception {
         super.start(context);
@@ -39,13 +26,6 @@ public class TSLintPlugin extends AbstractUIPlugin {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext
-     * )
-     */
     @Override
     public void stop(BundleContext context) throws Exception {
         plugin = null;
@@ -59,11 +39,6 @@ public class TSLintPlugin extends AbstractUIPlugin {
         return tslintFile.getAbsolutePath();
     }
 
-    /**
-     * Returns the shared instance
-     * 
-     * @return the shared instance
-     */
     public static TSLintPlugin getDefault() {
         return plugin;
     }

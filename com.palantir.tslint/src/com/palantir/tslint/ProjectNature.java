@@ -9,22 +9,14 @@ import org.eclipse.core.runtime.CoreException;
 
 public class ProjectNature implements IProjectNature {
 
-    /**
-     * ID of this project nature
-     */
     public static final String NATURE_ID = "com.palantir.tslint.tslintNature";
 
     private IProject project;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.core.resources.IProjectNature#configure()
-     */
     @Override
     public void configure() throws CoreException {
-        IProjectDescription desc = this.project.getDescription();
-        ICommand[] commands = desc.getBuildSpec();
+        IProjectDescription description = this.project.getDescription();
+        ICommand[] commands = description.getBuildSpec();
 
         for (int i = 0; i < commands.length; ++i) {
             if (commands[i].getBuilderName().equals(Builder.BUILDER_ID)) {
@@ -34,18 +26,13 @@ public class ProjectNature implements IProjectNature {
 
         ICommand[] newCommands = new ICommand[commands.length + 1];
         System.arraycopy(commands, 0, newCommands, 0, commands.length);
-        ICommand command = desc.newCommand();
+        ICommand command = description.newCommand();
         command.setBuilderName(Builder.BUILDER_ID);
         newCommands[newCommands.length - 1] = command;
-        desc.setBuildSpec(newCommands);
-        this.project.setDescription(desc, null);
+        description.setBuildSpec(newCommands);
+        this.project.setDescription(description, null);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.core.resources.IProjectNature#deconfigure()
-     */
     @Override
     public void deconfigure() throws CoreException {
         IProjectDescription description = getProject().getDescription();
@@ -63,21 +50,11 @@ public class ProjectNature implements IProjectNature {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.core.resources.IProjectNature#getProject()
-     */
     @Override
     public IProject getProject() {
         return this.project;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.core.resources.IProjectNature#setProject(org.eclipse.core.resources.IProject)
-     */
     @Override
     public void setProject(IProject project) {
         this.project = project;
