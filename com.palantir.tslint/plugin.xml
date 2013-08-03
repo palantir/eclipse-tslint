@@ -72,7 +72,7 @@
               locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">
            <command
                  commandId="com.palantir.tslint.addRemoveProjectNature"
-                 label="Disable TSLint builder"
+                 label="Disable TSLint Builder"
                  style="push">
               <visibleWhen
                     checkEnabled="false">
@@ -97,7 +97,7 @@
            </command>
            <command
                  commandId="com.palantir.tslint.addRemoveProjectNature"
-                 label="Enable TSLint builder"
+                 label="Enable TSLint Builder"
                  style="push">
               <visibleWhen
                     checkEnabled="false">
