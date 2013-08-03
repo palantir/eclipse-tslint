@@ -43,7 +43,7 @@ import com.google.common.collect.Maps;
 import com.palantir.tslint.failure.RuleFailure;
 import com.palantir.tslint.failure.RuleFailurePosition;
 
-public class Builder extends IncrementalProjectBuilder {
+public final class Builder extends IncrementalProjectBuilder {
 
     public static final String BUILDER_ID = "com.palantir.tslint.tslintBuilder";
 

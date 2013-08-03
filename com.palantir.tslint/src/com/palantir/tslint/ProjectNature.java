@@ -22,7 +22,7 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 
-public class ProjectNature implements IProjectNature {
+public final class ProjectNature implements IProjectNature {
 
     public static final String NATURE_ID = "com.palantir.tslint.tslintNature";
 

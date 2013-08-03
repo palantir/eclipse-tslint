@@ -18,7 +18,7 @@ package com.palantir.tslint.failure;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class RuleFailure {
+public final class RuleFailure {
 	private String failure;
 	private String name;
 	private RuleFailurePosition startPosition;

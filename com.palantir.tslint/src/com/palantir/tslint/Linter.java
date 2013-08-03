@@ -40,7 +40,7 @@ import com.google.common.collect.Maps;
 import com.palantir.tslint.failure.RuleFailure;
 import com.palantir.tslint.failure.RuleFailurePosition;
 
-class Linter {
+final class Linter {
 
     public static final String MARKER_TYPE = "com.palantir.tslint.tslintProblem";
 
