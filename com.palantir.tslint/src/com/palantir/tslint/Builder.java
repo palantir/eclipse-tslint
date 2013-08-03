@@ -36,20 +36,19 @@ public class Builder extends IncrementalProjectBuilder {
 
     public Builder() {
         super();
-
         this.linter = new Linter();
     }
 
     @Override
     protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor monitor) throws CoreException {
         if (kind == FULL_BUILD) {
-            fullBuild(monitor);
+            fullBuild();
         } else {
             IResourceDelta delta = getDelta(getProject());
             if (delta == null) {
-                fullBuild(monitor);
+                fullBuild();
             } else {
-                incrementalBuild(delta, monitor);
+                incrementalBuild(delta);
             }
         }
         return null;
@@ -60,14 +59,14 @@ public class Builder extends IncrementalProjectBuilder {
         getProject().deleteMarkers(Linter.MARKER_TYPE, true, IResource.DEPTH_INFINITE);
     }
 
-    protected void fullBuild(final IProgressMonitor monitor) {
+    protected void fullBuild() {
         try {
             getProject().accept(new ResourceVisitor());
         } catch (CoreException e) {
         }
     }
 
-    protected void incrementalBuild(IResourceDelta delta, IProgressMonitor monitor) throws CoreException {
+    protected void incrementalBuild(IResourceDelta delta) throws CoreException {
         delta.accept(new DeltaVisitor());
     }
 
