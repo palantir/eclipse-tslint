@@ -51,6 +51,7 @@ public class Builder extends IncrementalProjectBuilder {
                 incrementalBuild(delta);
             }
         }
+
         return null;
     }
 
@@ -59,26 +60,24 @@ public class Builder extends IncrementalProjectBuilder {
         getProject().deleteMarkers(Linter.MARKER_TYPE, true, IResource.DEPTH_INFINITE);
     }
 
-    protected void fullBuild() {
-        try {
-            getProject().accept(new ResourceVisitor());
-        } catch (CoreException e) {
-        }
+    protected void fullBuild() throws CoreException {
+        getProject().accept(new ResourceVisitor());
     }
 
     protected void incrementalBuild(IResourceDelta delta) throws CoreException {
         delta.accept(new DeltaVisitor());
     }
 
-    private String getLintConfigurationPath() {
-        return getProject().getFile(".tslintrc").getRawLocation().toOSString();
+    private void lint(IResource resource) throws IOException {
+        String configurationPath = getProject().getFile(".tslintrc").getRawLocation().toOSString();
+        this.linter.lint(resource, configurationPath);
     }
 
     private class ResourceVisitor implements IResourceVisitor {
         @Override
         public boolean visit(IResource resource) {
             try {
-                Builder.this.linter.lint(resource, getLintConfigurationPath());
+                lint(resource);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -91,11 +90,12 @@ public class Builder extends IncrementalProjectBuilder {
         @Override
         public boolean visit(IResourceDelta delta) throws CoreException {
             IResource resource = delta.getResource();
+
             switch (delta.getKind()) {
                 case IResourceDelta.ADDED:
                 case IResourceDelta.CHANGED:
                     try {
-                        Builder.this.linter.lint(resource, getLintConfigurationPath());
+                        lint(resource);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
