@@ -11,4 +11,4 @@ eclipse-tslint highlights common TypeScript errors inside Eclipse. Similar to Ch
 ### Enabling the Builder
 
 1. Right-click on a project containing TypeScript files.
-2. Select `Configure`->`Enable TSLint Builder`.
+2. Select `Configure`-`Enable TSLint Builder`.
