@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -33,6 +34,8 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.palantir.tslint.failure.RuleFailure;
 import com.palantir.tslint.failure.RuleFailurePosition;
@@ -41,29 +44,31 @@ class Linter {
 
     public static final String MARKER_TYPE = "com.palantir.tslint.tslintProblem";
 
+    private static final String OS_NAME = System.getProperty("os.name");
+
+    private static final Splitter PATH_SPLITTER = Splitter.on(File.pathSeparatorChar);
+
+    private final String nodePath;
+
+    public Linter() {
+        File nodeFile = findNode();
+        this.nodePath = nodeFile.getAbsolutePath();
+    }
+
     public void lint(IResource resource, String configurationPath) throws IOException {
         if (resource instanceof IFile && resource.getName().endsWith(".ts")) {
             IFile file = (IFile) resource;
             String linterPath = TSLintPlugin.getLinterPath();
             String resourcePath = resource.getRawLocation().toOSString();
 
-            // remove any pre-existing markers for this file
+            // remove any pre-existing markers for the given file
             deleteMarkers(file);
 
             // start tslint and get its output
-            ProcessBuilder processBuilder = new ProcessBuilder(linterPath,
+            ProcessBuilder processBuilder = new ProcessBuilder(this.nodePath, linterPath,
                 "-f", resourcePath,
                 "-t", "json",
                 "-c", configurationPath);
-
-            // TODO: Take out the platform specific hack
-            Map<String, String> processBuilderEnvironment = processBuilder.environment();
-            String path = processBuilderEnvironment.get("PATH");
-            if (path.length() != 0) {
-                path = path + ":";
-            }
-            path = path + "/usr/local/bin";
-            processBuilderEnvironment.put("PATH", path);
 
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), Charsets.UTF_8));
@@ -112,4 +117,33 @@ class Linter {
         }
     }
 
+    private static File findNode() {
+        String nodeFileName = getNodeFileName();
+        String path = System.getenv("PATH");
+        List<String> directories = Lists.newArrayList(PATH_SPLITTER.split(path));
+
+        // ensure /usr/local/bin is included for OS X
+        if (OS_NAME.startsWith("Mac OS X")) {
+            directories.add("/usr/local/bin");
+        }
+
+        // search for Node.js in the PATH directories
+        for (String directory : directories) {
+            File nodeFile = new File(directory, nodeFileName);
+
+            if (nodeFile.exists()) {
+                return nodeFile;
+            }
+        }
+
+        throw new IllegalStateException("Could not find Node.js.");
+    }
+
+    private static String getNodeFileName() {
+        if (OS_NAME.startsWith("Windows")) {
+            return "node.exe";
+        }
+
+        return "node";
+    }
 }
