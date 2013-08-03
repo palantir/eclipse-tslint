@@ -22,7 +22,7 @@ import com.google.common.collect.Maps;
 import com.palantir.tslint.failure.RuleFailure;
 import com.palantir.tslint.failure.RuleFailurePosition;
 
-public class Linter {
+class Linter {
 
     public static final String MARKER_TYPE = "com.palantir.tslint.tslintProblem";
 
