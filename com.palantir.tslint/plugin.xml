@@ -60,9 +60,9 @@
         </category>
         <command
               categoryId="com.palantir.tslint.tslintNature.category"
-              defaultHandler="com.palantir.tslint.AddRemoveProjectNatureHandler"
-              id="com.palantir.tslint.addRemoveProjectNature"
-              name="Add/RemoveTSLint Project Nature">
+              defaultHandler="com.palantir.tslint.ToggleNatureHandler"
+              id="com.palantir.tslint.toggleNature"
+              name="Toggle Project Nature">
         </command>
      </extension>
 
@@ -71,7 +71,7 @@
         <menuContribution
               locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">
            <command
-                 commandId="com.palantir.tslint.addRemoveProjectNature"
+                 commandId="com.palantir.tslint.toggleNature"
                  label="Disable TSLint Builder"
                  style="push">
               <visibleWhen
@@ -96,7 +96,7 @@
               </visibleWhen>
            </command>
            <command
-                 commandId="com.palantir.tslint.addRemoveProjectNature"
+                 commandId="com.palantir.tslint.toggleNature"
                  label="Enable TSLint Builder"
                  style="push">
               <visibleWhen
