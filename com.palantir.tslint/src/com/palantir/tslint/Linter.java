@@ -26,54 +26,43 @@ class Linter {
 
     public static final String MARKER_TYPE = "com.palantir.tslint.tslintProblem";
 
-    public void lint(IResource resource, String configurationFilePath) {
+    public void lint(IResource resource, String configurationPath) throws IOException {
         if (resource instanceof IFile && resource.getName().endsWith(".ts")) {
             IFile file = (IFile) resource;
+            String linterPath = TSLintPlugin.getLinterPath();
+            String resourcePath = resource.getRawLocation().toOSString();
 
+            // remove any pre-existing markers for this file
             deleteMarkers(file);
 
-            try {
-                File bundleFile = FileLocator.getBundleFile(TSLintPlugin.getDefault().getBundle());
-                File tslintFile = new File(bundleFile, "../node_modules/tslint/bin/tslint");
-                String tslintPath = tslintFile.getAbsolutePath();
+            // start tslint and get its output
+            ProcessBuilder processBuilder = new ProcessBuilder(linterPath,
+                "-f", resourcePath,
+                "-t", "json",
+                "-c", configurationPath);
 
-                String resourceFullPathString = resource.getRawLocation().toOSString();
-                // start tslint and get its output
-                ProcessBuilder processBuilder = new ProcessBuilder(tslintPath,
-                    "-f", resourceFullPathString,
-                    "-t", "json",
-                    "-c", configurationFilePath);
+            // TODO: Take out the platform specific hack
+            Map<String, String> processBuilderEnvironment = processBuilder.environment();
+            String path = processBuilderEnvironment.get("PATH");
+            if (path.length() != 0) {
+                path = path + ":";
+            }
+            path = path + "/usr/local/bin";
+            processBuilderEnvironment.put("PATH", path);
 
-                // TODO: Take out the platform specific hack
-                Map<String, String> processBuilderEnvironment = processBuilder.environment();
-                String path = processBuilderEnvironment.get("PATH");
-                if (path.length() != 0) {
-                    path = path + ":";
-                }
-                path = path + "/usr/local/bin";
-                processBuilderEnvironment.put("PATH", path);
+            Process process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), Charsets.UTF_8));
+            String jsonString = reader.readLine();
 
-                Process process = processBuilder.start();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), Charsets.UTF_8));
-                String jsonString = reader.readLine();
+            // Now that we have the complete output, terminate the process
+            process.destroy();
 
-                // Terminate process now that we have the complete output
-                process.destroy();
-
-                if (jsonString == null) {
-                    // If there are no errors, short-circuit so Jackson doesn't trip up
-                    return;
-                }
-
+            if (jsonString != null) {
                 ObjectMapper objectMapper = new ObjectMapper();
-
                 RuleFailure[] ruleFailures = objectMapper.readValue(jsonString, RuleFailure[].class);
                 for (RuleFailure ruleFailure : ruleFailures) {
                     addMarker(ruleFailure);
                 }
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         }
     }
@@ -83,26 +72,28 @@ class Linter {
             Path path = new Path(ruleViolation.getName());
             IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path);
 
-            Map<String, Object> attributes = Maps.newHashMap();
-
             RuleFailurePosition startPosition = ruleViolation.getStartPosition();
             RuleFailurePosition endPosition = ruleViolation.getEndPosition();
 
+            Map<String, Object> attributes = Maps.newHashMap();
             attributes.put(IMarker.LINE_NUMBER, startPosition.getLine() + 1);
             attributes.put(IMarker.CHAR_START, startPosition.getPosition());
             attributes.put(IMarker.CHAR_END, endPosition.getPosition());
             attributes.put(IMarker.MESSAGE, ruleViolation.getFailure());
             attributes.put(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
             attributes.put(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+
             MarkerUtilities.createMarker(file, attributes, MARKER_TYPE);
         } catch (CoreException e) {
+            throw new RuntimeException(e);
         }
     }
 
     private void deleteMarkers(IFile file) {
         try {
             file.deleteMarkers(MARKER_TYPE, false, IResource.DEPTH_ZERO);
-        } catch (CoreException ce) {
+        } catch (CoreException e) {
+            throw new RuntimeException(e);
         }
     }
 

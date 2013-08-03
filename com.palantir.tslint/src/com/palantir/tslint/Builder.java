@@ -77,7 +77,12 @@ public class Builder extends IncrementalProjectBuilder {
     private class ResourceVisitor implements IResourceVisitor {
         @Override
         public boolean visit(IResource resource) {
-            Builder.this.linter.lint(resource, getLintConfigurationPath());
+            try {
+                Builder.this.linter.lint(resource, getLintConfigurationPath());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
             return true;
         }
     }
@@ -89,11 +94,14 @@ public class Builder extends IncrementalProjectBuilder {
             switch (delta.getKind()) {
                 case IResourceDelta.ADDED:
                 case IResourceDelta.CHANGED:
-                    Builder.this.linter.lint(resource, getLintConfigurationPath());
+                    try {
+                        Builder.this.linter.lint(resource, getLintConfigurationPath());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                     break;
             }
 
-            // return true to continue visiting children.
             return true;
         }
     }
