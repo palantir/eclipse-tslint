@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -51,6 +50,7 @@ public class Builder extends IncrementalProjectBuilder {
 	}
 
 	static class FilePosition {
+		@SuppressWarnings("unused")
 		private int character;
 		private int line;
 		private int position;
@@ -167,7 +167,7 @@ public class Builder extends IncrementalProjectBuilder {
 			FilePosition startPosition = ruleViolation.position.start;
 			FilePosition endPosition = ruleViolation.position.end;
 
-			attributes.put(IMarker.LINE_NUMBER, startPosition.line);
+			attributes.put(IMarker.LINE_NUMBER, startPosition.line + 1);
 			attributes.put(IMarker.CHAR_START, startPosition.position);
 			attributes.put(IMarker.CHAR_END, endPosition.position);
 			attributes.put(IMarker.MESSAGE, ruleViolation.failure);
