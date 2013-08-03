@@ -21,79 +21,19 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
+import com.palantir.tslint.failure.RuleFailure;
+import com.palantir.tslint.failure.RuleFailurePosition;
 
 public class Builder extends IncrementalProjectBuilder {
-
-	class DeltaVisitor implements IResourceDeltaVisitor {
-		public boolean visit(IResourceDelta delta) throws CoreException {
-			IResource resource = delta.getResource();
-			switch (delta.getKind()) {
-			case IResourceDelta.ADDED:
-			case IResourceDelta.CHANGED:
-				lint(resource);
-				break;
-			}
-			// return true to continue visiting children.
-			return true;
-		}
-	}
-
-	class ResourceVisitor implements IResourceVisitor {
-		public boolean visit(IResource resource) {
-			lint(resource);
-			return true;
-		}
-	}
-
-	static class FilePosition {
-		@SuppressWarnings("unused")
-		private int character;
-		private int line;
-		private int position;
-
-		public FilePosition(@JsonProperty("character") int character,
-				@JsonProperty("line") int line,
-				@JsonProperty("position") int position) {
-			this.character = character;
-			this.line = line;
-			this.position = position;
-		}
-	}
-
-	static class FailurePosition {
-		private FilePosition start;
-		private FilePosition end;
-
-		public FailurePosition(@JsonProperty("start") FilePosition start,
-				@JsonProperty("end") FilePosition end) {
-			this.start = start;
-			this.end = end;
-		}
-	}
-
-	static class RuleViolation {
-		private String failure;
-		private String name;
-		private FailurePosition position;
-
-		public RuleViolation(@JsonProperty("failure") String failure,
-				@JsonProperty("name") String name,
-				@JsonProperty("failurePosition") FailurePosition position) {
-			this.failure = failure;
-			this.name = name;
-			this.position = position;
-		}
-	}
 
 	public static final String BUILDER_ID = "com.palantir.tslint.tslintBuilder";
 
 	private static final String MARKER_TYPE = "com.palantir.tslint.tslintProblem";
 
-	void lint(IResource resource) {
+	private void lint(IResource resource) {
 		if (resource instanceof IFile && resource.getName().endsWith(".ts")) {
 			IFile file = (IFile) resource;
 
@@ -144,10 +84,10 @@ public class Builder extends IncrementalProjectBuilder {
 
 				ObjectMapper objectMapper = new ObjectMapper();
 
-				RuleViolation[] ruleViolations = objectMapper.readValue(
-						jsonString, RuleViolation[].class);
-				for (RuleViolation ruleViolation : ruleViolations) {
-					addMarker(ruleViolation);
+				RuleFailure[] ruleFailures = objectMapper.readValue(jsonString,
+						RuleFailure[].class);
+				for (RuleFailure ruleFailure : ruleFailures) {
+					addMarker(ruleFailure);
 				}
 
 			} catch (IOException e) {
@@ -156,21 +96,22 @@ public class Builder extends IncrementalProjectBuilder {
 		}
 	}
 
-	private void addMarker(RuleViolation ruleViolation) {
+	private void addMarker(RuleFailure ruleViolation) {
 		try {
-			Path path = new Path(ruleViolation.name);
+			Path path = new Path(ruleViolation.getName());
 			IFile file = ResourcesPlugin.getWorkspace().getRoot()
 					.getFileForLocation(path);
 
 			Map<String, Object> attributes = Maps.newHashMap();
 
-			FilePosition startPosition = ruleViolation.position.start;
-			FilePosition endPosition = ruleViolation.position.end;
+			RuleFailurePosition startPosition = ruleViolation
+					.getStartPosition();
+			RuleFailurePosition endPosition = ruleViolation.getEndPosition();
 
-			attributes.put(IMarker.LINE_NUMBER, startPosition.line + 1);
-			attributes.put(IMarker.CHAR_START, startPosition.position);
-			attributes.put(IMarker.CHAR_END, endPosition.position);
-			attributes.put(IMarker.MESSAGE, ruleViolation.failure);
+			attributes.put(IMarker.LINE_NUMBER, startPosition.getLine() + 1);
+			attributes.put(IMarker.CHAR_START, startPosition.getPosition());
+			attributes.put(IMarker.CHAR_END, endPosition.getPosition());
+			attributes.put(IMarker.MESSAGE, ruleViolation.getFailure());
 			attributes.put(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
 			attributes.put(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
 			MarkerUtilities.createMarker(file, attributes, MARKER_TYPE);
@@ -218,4 +159,27 @@ public class Builder extends IncrementalProjectBuilder {
 		// the visitor does the work.
 		delta.accept(new DeltaVisitor());
 	}
+
+	class ResourceVisitor implements IResourceVisitor {
+		public boolean visit(IResource resource) {
+			lint(resource);
+			return true;
+		}
+	}
+
+	class DeltaVisitor implements IResourceDeltaVisitor {
+		public boolean visit(IResourceDelta delta) throws CoreException {
+			IResource resource = delta.getResource();
+			switch (delta.getKind()) {
+			case IResourceDelta.ADDED:
+			case IResourceDelta.CHANGED:
+				lint(resource);
+				break;
+			}
+
+			// return true to continue visiting children.
+			return true;
+		}
+	}
+
 }
