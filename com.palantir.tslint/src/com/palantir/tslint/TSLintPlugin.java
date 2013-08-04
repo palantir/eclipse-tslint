@@ -49,7 +49,7 @@ public final class TSLintPlugin extends AbstractUIPlugin {
 
     public static String getLinterPath() throws IOException {
         File bundleFile = FileLocator.getBundleFile(TSLintPlugin.getDefault().getBundle());
-        File tslintFile = new File(bundleFile, "../node_modules/tslint/bin/tslint-cli.js");
+        File tslintFile = new File(bundleFile, "node_modules/tslint/bin/tslint-cli.js");
 
         return tslintFile.getAbsolutePath();
     }
