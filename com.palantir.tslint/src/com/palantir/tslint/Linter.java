@@ -28,7 +28,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
@@ -74,7 +73,7 @@ final class Linter {
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), Charsets.UTF_8));
             String jsonString = reader.readLine();
 
-            // Now that we have the complete output, terminate the process
+            // now that we have the complete output, terminate the process
             process.destroy();
 
             if (jsonString != null) {
