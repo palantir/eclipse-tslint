@@ -28,9 +28,6 @@ import org.osgi.framework.BundleContext;
  */
 public final class TSLintPlugin extends AbstractUIPlugin {
 
-    // The plug-in ID
-    public static final String PLUGIN_ID = "CheckTypeScriptStyle";
-
     // The shared instance
     private static TSLintPlugin plugin;
 

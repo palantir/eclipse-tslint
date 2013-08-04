@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: CheckTypeScriptStyle
+Bundle-Name: TSLint
 Bundle-SymbolicName: com.palantir.tslint;singleton:=true
 Bundle-Version: 0.9.0.qualifier
 Bundle-Activator: com.palantir.tslint.TSLintPlugin
