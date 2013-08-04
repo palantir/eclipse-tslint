@@ -1,14 +1,22 @@
-# eclipse-tslint
+# Eclipse TSLint Plug-in
 
-eclipse-tslint highlights common TypeScript errors inside Eclipse. Similar to CheckStyle, it will put markers in your code where bad usage patterns are seen.
+An Eclipse plug-in for linting TypeScript code using [tslint](https://github.com/palantir/tslint).
 
 ## Installation
 
-1. `npm install` in the root directory of the project to install the dependencies
-2. Add a .tslintrc file to specify the checks you want to enable. See <http://github.com/palantir/tslint> for the specification of the file.
-3. Add an entry to the buildCommand node to your .project file of the form:
+1. Install [Node.js](http://nodejs.org/).
 
 ### Enabling the Builder
 
 1. Right-click on a project containing TypeScript files.
 2. Select `Configure`-`Enable TSLint Builder`.
+
+### Configuration File
+
+The plugin expects the configuration file [`.tslintrc`](https://github.com/palantir/tslint) to be present in the project's root directory. If no such file is present, then no linting is performed on TypeScript files.
+
+## Development
+
+1. `git clone git@github.com:palantir/eclipse-tslint.git`
+2. Run `npm install --prefix com.palantir.tslint com.palantir.tslint` in the root directory of the project to install npm dependencies.
+3. In Eclipse, right-click on the `eclipse-tslint` project and select `Debug As` - `Eclipse Application`.
