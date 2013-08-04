@@ -100,7 +100,7 @@ final class Linter {
             attributes.put(IMarker.CHAR_END, endPosition.getPosition());
             attributes.put(IMarker.MESSAGE, ruleViolation.getFailure());
             attributes.put(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
-            attributes.put(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+            attributes.put(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
 
             MarkerUtilities.createMarker(file, attributes, MARKER_TYPE);
         } catch (CoreException e) {
