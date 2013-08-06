@@ -6,7 +6,7 @@ An Eclipse plug-in for linting TypeScript code using [tslint](https://github.com
 
 1. Install [Node.js](http://nodejs.org/).
 2. Open Eclipse and go to Help->Install New Software.
-3. Add the update site: http://eclipse-update.palantir.com/eclipse-typescript/
+3. Add the update site: http://eclipse-update.palantir.com/eclipse-tslint/
 4. Reboot Eclipse.
 
 ### Enabling the Builder
