@@ -82,15 +82,18 @@
                           value="1">
                     </count>
                     <iterate>
-                       <and>
-                          <instanceof
-                                value="org.eclipse.core.resources.IProject">
-                          </instanceof>
-                          <test
-                                property="org.eclipse.core.resources.projectNature"
-                                value="com.palantir.tslint.tslintNature">
-                          </test>
-                       </and>
+                      <adapt
+                        type="org.eclipse.core.resources.IProject">
+                        <and>
+                            <instanceof
+                                  value="org.eclipse.core.resources.IProject">
+                            </instanceof>
+                            <test
+                                  property="org.eclipse.core.resources.projectNature"
+                                  value="com.palantir.tslint.tslintNature">
+                            </test>
+                        </and>
+                      </adapt>
                     </iterate>
                  </with>
               </visibleWhen>
@@ -107,17 +110,20 @@
                           value="1">
                     </count>
                     <iterate>
-                       <and>
+                      <adapt
+                        type="org.eclipse.core.resources.IProject">
+                          <and>
                           <instanceof
                                 value="org.eclipse.core.resources.IProject">
                           </instanceof>
                           <not>
-                             <test
+                              <test
                                    property="org.eclipse.core.resources.projectNature"
                                    value="com.palantir.tslint.tslintNature">
-                             </test>
-                          </not>
-                       </and>
+                              </test>
+                            </not>
+                          </and>
+                      </adapt>
                     </iterate>
                  </with>
               </visibleWhen>
