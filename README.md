@@ -23,3 +23,11 @@ The plugin expects the configuration file [`tslint.json`](https://github.com/pal
 1. `git clone git@github.com:palantir/eclipse-tslint.git`
 2. Run `npm install --prefix com.palantir.tslint com.palantir.tslint` in the root directory of the project to install npm dependencies.
 3. In Eclipse, right-click on the `eclipse-tslint` project and select `Debug As` - `Eclipse Application`.
+
+## Building the Eclipse Update Site
+
+```
+grunt
+mvn clean install
+The update site will be in com.palantir.tslint.p2updatesite/target/repository.
+```

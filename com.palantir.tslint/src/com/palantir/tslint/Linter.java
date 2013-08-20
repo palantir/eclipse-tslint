@@ -55,7 +55,8 @@ final class Linter {
     }
 
     public void lint(IResource resource, String configurationPath) throws IOException {
-        if (resource instanceof IFile && resource.getName().endsWith(".ts")) {
+        String resourceName = resource.getName();
+        if (resource instanceof IFile && resourceName.endsWith(".ts") && !resourceName.endsWith(".d.ts")) {
             IFile file = (IFile) resource;
             String linterPath = TSLintPlugin.getLinterPath();
             String resourcePath = resource.getRawLocation().toOSString();
