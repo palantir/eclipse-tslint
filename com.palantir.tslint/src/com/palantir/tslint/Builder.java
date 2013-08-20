@@ -69,7 +69,7 @@ public final class Builder extends IncrementalProjectBuilder {
     }
 
     private void lint(IResource resource) throws IOException {
-        String configurationPath = getProject().getFile(".tslintrc").getRawLocation().toOSString();
+        String configurationPath = getProject().getFile("tslint.json").getRawLocation().toOSString();
         this.linter.lint(resource, configurationPath);
     }
 
