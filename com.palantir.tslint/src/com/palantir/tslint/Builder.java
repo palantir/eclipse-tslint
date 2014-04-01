@@ -16,6 +16,7 @@
 
 package com.palantir.tslint;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -76,7 +77,12 @@ public final class Builder extends IncrementalProjectBuilder {
         IScopeContext projectScope = new ProjectScope(project);
         IEclipsePreferences prefs = projectScope.getNode(TSLintPlugin.ID);
         String configurationPath = prefs.get("configPath", null);
-        if (configurationPath == null || configurationPath.equals("")) {
+        if (configurationPath != null && !configurationPath.equals("")) {
+            File configFile = new File(configurationPath);
+            if (!configFile.isAbsolute()) { // if we're given a relative path get the absolute path for it
+                configurationPath = new File(project.getRawLocation().toOSString(), configurationPath).getAbsolutePath();
+            }
+        } else {
             configurationPath = project.getFile("tslint.json").getRawLocation().toOSString();
         }
         this.linter.lint(resource, configurationPath);
