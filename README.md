@@ -16,7 +16,7 @@ An Eclipse plug-in for linting TypeScript code using [tslint](https://github.com
 
 ### Configuration File
 
-The plugin expects the configuration file [`tslint.json`](https://github.com/palantir/tslint) to be present in the project's root directory. If no such file is present, then no linting is performed on TypeScript files.
+The plugin expects the configuration file [`tslint.json`](https://github.com/palantir/tslint) to be present in the project's root directory. If no such file is present, then create `.settings/com.palantir.tslint.prefs` and add `configPath=<path to tslint.json>`.
 
 ## Development
 
