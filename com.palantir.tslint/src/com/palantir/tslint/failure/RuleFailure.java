@@ -21,15 +21,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public final class RuleFailure {
 	private String failure;
 	private String name;
+	private String ruleName;
 	private RuleFailurePosition startPosition;
 	private RuleFailurePosition endPosition;
 
 	public RuleFailure(@JsonProperty("failure") String failure,
 			@JsonProperty("name") String name,
+			@JsonProperty("ruleName") String ruleName,
 			@JsonProperty("startPosition") RuleFailurePosition startPosition,
 			@JsonProperty("endPosition") RuleFailurePosition endPosition) {
 		this.failure = failure;
 		this.name = name;
+		this.ruleName = ruleName;
 		this.startPosition = startPosition;
 		this.endPosition = endPosition;
 	}
@@ -41,6 +44,10 @@ public final class RuleFailure {
 	public String getName() {
 		return this.name;
 	}
+
+	public String getRuleName() {
+        return this.ruleName;
+    }
 
 	public RuleFailurePosition getStartPosition() {
 		return this.startPosition;
