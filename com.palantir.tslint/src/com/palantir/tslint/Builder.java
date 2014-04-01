@@ -74,7 +74,7 @@ public final class Builder extends IncrementalProjectBuilder {
     private void lint(IResource resource) throws IOException {
         IProject project = this.getProject();
         IScopeContext projectScope = new ProjectScope(project);
-        IEclipsePreferences prefs = projectScope.getNode("com.palantir.tslint");
+        IEclipsePreferences prefs = projectScope.getNode(TSLintPlugin.ID);
         String configurationPath = prefs.get("configPath", null);
         if (configurationPath == null || configurationPath.equals("")) {
             configurationPath = project.getFile("tslint.json").getRawLocation().toOSString();
