@@ -25,8 +25,11 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 
 public final class Builder extends IncrementalProjectBuilder {
 
@@ -69,7 +72,13 @@ public final class Builder extends IncrementalProjectBuilder {
     }
 
     private void lint(IResource resource) throws IOException {
-        String configurationPath = getProject().getFile("tslint.json").getRawLocation().toOSString();
+        IProject project = this.getProject();
+        IScopeContext projectScope = new ProjectScope(project);
+        IEclipsePreferences prefs = projectScope.getNode("com.palantir.tslint");
+        String configurationPath = prefs.get("configPath", null);
+        if (configurationPath == null || configurationPath.equals("")) {
+            configurationPath = project.getFile("tslint.json").getRawLocation().toOSString();
+        }
         this.linter.lint(resource, configurationPath);
     }
 

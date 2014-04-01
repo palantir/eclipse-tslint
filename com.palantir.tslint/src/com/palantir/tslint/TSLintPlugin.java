@@ -30,6 +30,7 @@ public final class TSLintPlugin extends AbstractUIPlugin {
 
     // The shared instance
     private static TSLintPlugin plugin;
+    public static final String ID = "com.palantir.tslint";
 
     @Override
     public void start(BundleContext context) throws Exception {
