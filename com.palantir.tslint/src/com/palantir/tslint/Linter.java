@@ -16,10 +16,8 @@
 
 package com.palantir.tslint;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 
@@ -36,8 +34,11 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.io.Files;
 import com.palantir.tslint.failure.RuleFailure;
 import com.palantir.tslint.failure.RuleFailurePosition;
+import com.palantir.tslint.services.Bridge;
+import com.palantir.tslint.services.Request;
 
 final class Linter {
 
@@ -47,39 +48,36 @@ final class Linter {
 
     private static final Splitter PATH_SPLITTER = Splitter.on(File.pathSeparatorChar);
 
-    private final String nodePath;
+    private Bridge bridge;
 
     public Linter() {
-        File nodeFile = findNode();
-        this.nodePath = nodeFile.getAbsolutePath();
+        this.bridge = null;
     }
 
     public void lint(IResource resource, String configurationPath) throws IOException {
         String resourceName = resource.getName();
         if (resource instanceof IFile && resourceName.endsWith(".ts") && !resourceName.endsWith(".d.ts")) {
             IFile file = (IFile) resource;
-            String linterPath = TSLintPlugin.getLinterPath();
             String resourcePath = resource.getRawLocation().toOSString();
 
             // remove any pre-existing markers for the given file
             deleteMarkers(file);
 
-            // start tslint and get its output
-            ProcessBuilder processBuilder = new ProcessBuilder(this.nodePath, linterPath,
-                "-f", resourcePath,
-                "-t", "json",
-                "-c", configurationPath);
+            // get a bridge
+            if (this.bridge == null) {
+                String configuration = Files.toString(new File(configurationPath), Charsets.UTF_8);
+                Request configurationRequest = new Request("setConfiguration", configuration);
 
-            Process process = processBuilder.start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), Charsets.UTF_8));
-            String jsonString = reader.readLine();
+                this.bridge = new Bridge();
+                this.bridge.call(configurationRequest, Void.class);
+            }
 
-            // now that we have the complete output, terminate the process
-            process.destroy();
+            Request request = new Request("lint", resourcePath);
+            String response = this.bridge.call(request, String.class);
 
-            if (jsonString != null) {
+            if (response != null) {
                 ObjectMapper objectMapper = new ObjectMapper();
-                RuleFailure[] ruleFailures = objectMapper.readValue(jsonString, RuleFailure[].class);
+                RuleFailure[] ruleFailures = objectMapper.readValue(response, RuleFailure[].class);
                 for (RuleFailure ruleFailure : ruleFailures) {
                     addMarker(ruleFailure);
                 }

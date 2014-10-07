@@ -1,4 +1,6 @@
 .DS_Store
+.tscache/
+bin/
 ec_build/
 node_modules/
 target/

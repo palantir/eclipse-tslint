@@ -1,0 +1,5 @@
+build.path.exportedFolder=
+build.path.sourceFolder=src/bridge
+compiler.outputDirOption=bin
+compiler.outputFileOption=bridge.js
+eclipse.preferences.version=1
