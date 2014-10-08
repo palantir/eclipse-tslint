@@ -18,7 +18,6 @@ package com.palantir.tslint;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -31,8 +30,6 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.palantir.tslint.failure.RuleFailure;
@@ -43,10 +40,6 @@ import com.palantir.tslint.services.Request;
 final class Linter {
 
     public static final String MARKER_TYPE = "com.palantir.tslint.tslintProblem";
-
-    private static final String OS_NAME = System.getProperty("os.name");
-
-    private static final Splitter PATH_SPLITTER = Splitter.on(File.pathSeparatorChar);
 
     private Bridge bridge;
 
@@ -115,33 +108,4 @@ final class Linter {
         }
     }
 
-    private static File findNode() {
-        String nodeFileName = getNodeFileName();
-        String path = System.getenv("PATH");
-        List<String> directories = Lists.newArrayList(PATH_SPLITTER.split(path));
-
-        // ensure /usr/local/bin is included for OS X
-        if (OS_NAME.startsWith("Mac OS X")) {
-            directories.add("/usr/local/bin");
-        }
-
-        // search for Node.js in the PATH directories
-        for (String directory : directories) {
-            File nodeFile = new File(directory, nodeFileName);
-
-            if (nodeFile.exists()) {
-                return nodeFile;
-            }
-        }
-
-        throw new IllegalStateException("Could not find Node.js.");
-    }
-
-    private static String getNodeFileName() {
-        if (OS_NAME.startsWith("Windows")) {
-            return "node.exe";
-        }
-
-        return "node";
-    }
 }
