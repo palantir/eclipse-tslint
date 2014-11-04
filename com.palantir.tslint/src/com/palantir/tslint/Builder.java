@@ -28,6 +28,7 @@ import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
@@ -79,8 +80,12 @@ public final class Builder extends IncrementalProjectBuilder {
         String configurationPath = prefs.get("configPath", null);
         if (configurationPath != null && !configurationPath.equals("")) {
             File configFile = new File(configurationPath);
-            if (!configFile.isAbsolute()) { // if we're given a relative path get the absolute path for it
-                configurationPath = new File(project.getRawLocation().toOSString(), configurationPath).getAbsolutePath();
+            // if we're given a relative path get the absolute path for it
+            if (!configFile.isAbsolute()) {
+                IPath projectLocation = project.getRawLocation();
+                String projectLocationPath = projectLocation.toOSString();
+                File projectFile = new File(projectLocationPath, configurationPath);
+                configurationPath = projectFile.getAbsolutePath();
             }
         } else {
             configurationPath = project.getFile("tslint.json").getRawLocation().toOSString();
