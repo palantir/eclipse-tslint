@@ -21,7 +21,7 @@
     <relativePath>../pom.xml</relativePath>
     <groupId>com.palantir</groupId>
     <artifactId>parent</artifactId>
-    <version>0.9.5.qualifier</version>
+    <version>1.0.1.qualifier</version>
   </parent>
 
   <artifactId>com.palantir.tslint.p2updatesite</artifactId>
