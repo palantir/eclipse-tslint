@@ -237,6 +237,6 @@
          id="com.palantir.tslint"
          download-size="0"
          install-size="0"
-         version="0.9.5.qualifier"/>
+         version="1.0.1.qualifier"/>
 
 </feature>
