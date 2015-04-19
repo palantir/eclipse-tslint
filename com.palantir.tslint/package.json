@@ -2,7 +2,7 @@
   "name": "eclipse-tslint",
   "version": "2.0.1",
   "dependencies": {
-    "tslint": "2.0.1"
+    "tslint": "2.1.1"
   },
   "devDependencies": {
     "grunt": "0.4.5",
