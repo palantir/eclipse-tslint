@@ -50,7 +50,7 @@ final class Linter {
     public void lint(IResource resource, String configurationPath) throws IOException {
         String resourceName = resource.getName();
         if (resource instanceof IFile &&
-            (resourceName.endsWith(".ts") || resourceName.endsWith(".tsx"))&&
+            (resourceName.endsWith(".ts") || resourceName.endsWith(".tsx")) &&
             !resourceName.endsWith(".d.ts")) {
             IFile file = (IFile) resource;
             String resourcePath = resource.getRawLocation().toOSString();
