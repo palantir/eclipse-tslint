@@ -1,9 +1,9 @@
 {
   "name": "eclipse-tslint",
-  "version": "3.5.0",
+  "version": "3.7.0",
   "dependencies": {
     "tslint": "^3",
-    "typescript": "1.8.2"
+    "typescript": "1.8.9"
   },
   "devDependencies": {
     "grunt": "0.4.5",
