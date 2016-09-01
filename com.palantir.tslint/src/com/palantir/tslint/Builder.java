@@ -82,13 +82,13 @@ public final class Builder extends IncrementalProjectBuilder {
             File configFile = new File(configurationPath);
             // if we're given a relative path get the absolute path for it
             if (!configFile.isAbsolute()) {
-                IPath projectLocation = project.getRawLocation();
+                IPath projectLocation = project.getLocation();
                 String projectLocationPath = projectLocation.toOSString();
                 File projectFile = new File(projectLocationPath, configurationPath);
                 configurationPath = projectFile.getAbsolutePath();
             }
         } else {
-            configurationPath = project.getFile("tslint.json").getRawLocation().toOSString();
+            configurationPath = project.getFile("tslint.json").getLocation().toOSString();
         }
         this.linter.lint(resource, configurationPath);
     }
