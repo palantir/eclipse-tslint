@@ -16,39 +16,39 @@
 
 package com.palantir.tslint.failure;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 
-public final class RuleFailurePosition {
-    private final int character;
-    private final int line;
-    private final int position;
+/**
+ * @author alpapad
+ */
+public class Fix {
 
-    public RuleFailurePosition(@JsonProperty("character") int character,
-            @JsonProperty("line") int line,
-            @JsonProperty("position") int position) {
-        this.character = character;
-        this.line = line;
-        this.position = position;
+    private final String ruleName;
+    private final List<Replacement> replacements;
+
+    public Fix(@JsonProperty("innerRuleName") String innerRuleName,
+            @JsonProperty("innerReplacements") List<Replacement> innerReplacements) {
+        super();
+        this.ruleName = innerRuleName;
+        this.replacements = innerReplacements;
     }
 
-    public int getCharacter() {
-        return this.character;
+    public String getRuleName() {
+        return this.ruleName;
     }
 
-    public int getLine() {
-        return this.line;
+    public List<Replacement> getReplacements() {
+        return this.replacements;
     }
 
-    public int getPosition() {
-        return this.position;
-    }
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("line", this.line)
-            .add("position", this.position)
-            .add("character", this.character)
+            .add("ruleName", this.ruleName)
+            .add("replacements", this.replacements)
             .toString();
     }
 }

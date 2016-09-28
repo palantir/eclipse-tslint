@@ -17,24 +17,30 @@
 package com.palantir.tslint.failure;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 
 public final class RuleFailure {
-	private String failure;
-	private String name;
-	private String ruleName;
-	private RuleFailurePosition startPosition;
-	private RuleFailurePosition endPosition;
+	private final String failure;
+	private final String name;
+	private final String ruleName;
+	private final RuleFailurePosition startPosition;
+	private final RuleFailurePosition endPosition;
+	private final Fix fix;
 
+	//fix
 	public RuleFailure(@JsonProperty("failure") String failure,
 			@JsonProperty("name") String name,
 			@JsonProperty("ruleName") String ruleName,
 			@JsonProperty("startPosition") RuleFailurePosition startPosition,
-			@JsonProperty("endPosition") RuleFailurePosition endPosition) {
+			@JsonProperty("endPosition") RuleFailurePosition endPosition,
+			@JsonProperty("fix") Fix fix
+			) {
 		this.failure = failure;
 		this.name = name;
 		this.ruleName = ruleName;
 		this.startPosition = startPosition;
 		this.endPosition = endPosition;
+		this.fix = fix;
 	}
 
 	public String getFailure() {
@@ -56,4 +62,20 @@ public final class RuleFailure {
 	public RuleFailurePosition getEndPosition() {
 		return this.endPosition;
 	}
+
+    public Fix getFix() {
+        return this.fix;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+            .add("start", this.failure)
+            .add("length", this.name)
+            .add("ruleName", this.ruleName)
+            .add("startPosition", this.startPosition)
+            .add("endPosition", this.endPosition)
+            .add("fix", this.fix)
+            .toString();
+    }
 }
