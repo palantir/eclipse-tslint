@@ -16,39 +16,39 @@
 
 package com.palantir.tslint.failure;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 
-public final class RuleFailurePosition {
-    private final int character;
-    private final int line;
-    private final int position;
+/**
+ * @author alpapad
+ */
+public class Fix {
 
-    public RuleFailurePosition(@JsonProperty("character") int character,
-            @JsonProperty("line") int line,
-            @JsonProperty("position") int position) {
-        this.character = character;
-        this.line = line;
-        this.position = position;
+    private final String ruleName;
+    private final List<Replacement> replacements;
+
+    public Fix(@JsonProperty("innerRuleName") String innerRuleName,
+            @JsonProperty("innerReplacements") List<Replacement> innerReplacements) {
+        super();
+        this.ruleName = innerRuleName;
+        this.replacements = innerReplacements;
     }
 
-    public int getCharacter() {
-        return this.character;
+    public String getRuleName() {
+        return this.ruleName;
     }
 
-    public int getLine() {
-        return this.line;
+    public List<Replacement> getReplacements() {
+        return this.replacements;
     }
 
-    public int getPosition() {
-        return this.position;
-    }
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("line", this.line)
-            .add("position", this.position)
-            .add("character", this.character)
+            .add("ruleName", this.ruleName)
+            .add("replacements", this.replacements)
             .toString();
     }
 
@@ -56,9 +56,8 @@ public final class RuleFailurePosition {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + this.character;
-        result = prime * result + this.line;
-        result = prime * result + this.position;
+        result = prime * result + ((this.replacements == null) ? 0 : this.replacements.hashCode());
+        result = prime * result + ((this.ruleName == null) ? 0 : this.ruleName.hashCode());
         return result;
     }
 
@@ -70,12 +69,16 @@ public final class RuleFailurePosition {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        RuleFailurePosition other = (RuleFailurePosition) obj;
-        if (this.character != other.character)
+        Fix other = (Fix) obj;
+        if (this.replacements == null) {
+            if (other.replacements != null)
+                return false;
+        } else if (!this.replacements.equals(other.replacements))
             return false;
-        if (this.line != other.line)
-            return false;
-        if (this.position != other.position)
+        if (this.ruleName == null) {
+            if (other.ruleName != null)
+                return false;
+        } else if (!this.ruleName.equals(other.ruleName))
             return false;
         return true;
     }

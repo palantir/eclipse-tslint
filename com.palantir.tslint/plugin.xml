@@ -37,7 +37,12 @@
               value="true">
         </persistent>
      </extension>
-
+   <extension point="org.eclipse.ui.ide.markerResolution">
+      <markerResolutionGenerator
+         markerType="com.palantir.tslint.tslintProblem"
+         class="com.palantir.tslint.fix.QuickFixer"/>
+   </extension>
+   
      <extension
            id="tslintNature"
            name="TSLint Project Nature"

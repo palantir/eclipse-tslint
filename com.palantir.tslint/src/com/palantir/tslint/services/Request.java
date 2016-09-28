@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 /**
  * Represents a request which will be sent to the bridge.
@@ -48,7 +48,7 @@ public final class Request {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
             .add("method", this.method)
             .add("arguments", this.arguments)
             .toString();

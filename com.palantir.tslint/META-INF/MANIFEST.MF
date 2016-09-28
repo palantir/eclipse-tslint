@@ -9,13 +9,17 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.editors,
  org.eclipse.core.runtime,
  org.eclipse.equinox.registry,
- org.eclipse.core.resources
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+ org.eclipse.core.resources,
+ org.eclipse.ui.workbench,
+ org.eclipse.ui.ide,
+ org.eclipse.equinox.preferences
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Import-Package: org.eclipse.core.resources
+Import-Package: org.eclipse.core.resources,
+ org.eclipse.jface.text
 Bundle-ClassPath: .,
- lib/guava-14.0.1.jar,
- lib/jackson-core-2.2.0.jar,
- lib/jackson-databind-2.2.0.jar,
- lib/jackson-annotations-2.2.0.jar
+ lib/guava-19.0.jar,
+ lib/jackson-core-2.8.2.jar,
+ lib/jackson-databind-2.8.2.jar,
+ lib/jackson-annotations-2.8.2.jar
 Eclipse-BundleShape: dir
