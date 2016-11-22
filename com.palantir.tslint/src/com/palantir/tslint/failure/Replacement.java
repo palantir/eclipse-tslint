@@ -19,36 +19,46 @@ package com.palantir.tslint.failure;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 
-public final class RuleFailurePosition {
-    private final int character;
-    private final int line;
-    private final int position;
+/**
+ *
+ *
+ * @author alpapad
+ */
+public class Replacement {
 
-    public RuleFailurePosition(@JsonProperty("character") int character,
-            @JsonProperty("line") int line,
-            @JsonProperty("position") int position) {
-        this.character = character;
-        this.line = line;
-        this.position = position;
+    private final int start;
+    private final int length;
+    private final String text;
+
+    public Replacement(@JsonProperty("innerStart") int innerStart, @JsonProperty("innerLength") int innerLength, @JsonProperty("innerText") String innerText) {
+        super();
+        this.start = innerStart;
+        this.length = innerLength;
+        this.text = innerText;
     }
 
-    public int getCharacter() {
-        return this.character;
+    public int getStart() {
+        return this.start;
     }
 
-    public int getLine() {
-        return this.line;
+    public int getLength() {
+        return this.length;
     }
 
-    public int getPosition() {
-        return this.position;
+    public String getText() {
+        return this.text;
     }
+
+    public String apply(String content) {
+        return content.substring(0, this.start) + this.text + content.substring(this.start + this.length);
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("line", this.line)
-            .add("position", this.position)
-            .add("character", this.character)
+            .add("start", this.start)
+            .add("length", this.length)
+            .add("text", this.text)
             .toString();
     }
 
@@ -56,9 +66,9 @@ public final class RuleFailurePosition {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + this.character;
-        result = prime * result + this.line;
-        result = prime * result + this.position;
+        result = prime * result + this.length;
+        result = prime * result + this.start;
+        result = prime * result + ((this.text == null) ? 0 : this.text.hashCode());
         return result;
     }
 
@@ -70,12 +80,15 @@ public final class RuleFailurePosition {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        RuleFailurePosition other = (RuleFailurePosition) obj;
-        if (this.character != other.character)
+        Replacement other = (Replacement) obj;
+        if (this.length != other.length)
             return false;
-        if (this.line != other.line)
+        if (this.start != other.start)
             return false;
-        if (this.position != other.position)
+        if (this.text == null) {
+            if (other.text != null)
+                return false;
+        } else if (!this.text.equals(other.text))
             return false;
         return true;
     }

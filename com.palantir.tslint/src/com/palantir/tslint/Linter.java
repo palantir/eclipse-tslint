@@ -18,6 +18,7 @@ package com.palantir.tslint;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -43,6 +44,7 @@ final class Linter {
 
     private Bridge bridge;
 
+    private final ObjectMapper mapper = new ObjectMapper();
     public Linter() {
         this.bridge = null;
     }
@@ -95,6 +97,15 @@ final class Linter {
             attributes.put(IMarker.MESSAGE, ruleViolation.getFailure());
             attributes.put(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
             attributes.put(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
+            if(ruleViolation.getFix() != null) {
+                StringWriter sw = new StringWriter();
+                try {
+                    this.mapper.writeValue(sw, ruleViolation);
+                    attributes.put("tsViolation", sw.toString());
+                } catch (Exception e) {
+                }
+            }
+
 
             MarkerUtilities.createMarker(file, attributes, MARKER_TYPE);
         } catch (CoreException e) {
@@ -107,6 +118,14 @@ final class Linter {
             file.deleteMarkers(MARKER_TYPE, false, IResource.DEPTH_ZERO);
         } catch (CoreException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void dispose() {
+        System.err.println("Disposing bridge for linter..." + this);
+        if(this.bridge != null) {
+            this.bridge.dispose();
+            this.bridge = null;
         }
     }
 
