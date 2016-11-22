@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.FileLocator;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -59,6 +60,7 @@ public final class Bridge {
 
     public Bridge() {
         this.mapper = new ObjectMapper();
+        this.mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         // start the node process
         this.start();
@@ -68,7 +70,7 @@ public final class Bridge {
         checkNotNull(request);
         checkNotNull(resultType);
 
-        JavaType type = TypeFactory.defaultInstance().uncheckedSimpleType(resultType);
+        JavaType type = TypeFactory.defaultInstance().constructType(resultType);
 
         return this.call(request, type);
     }
@@ -103,7 +105,7 @@ public final class Bridge {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
+        this.nodeProcess.destroy();
         this.nodeProcess = null;
     }
 

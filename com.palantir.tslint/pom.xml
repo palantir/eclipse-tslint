@@ -18,9 +18,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <relativePath>../pom.xml</relativePath>
-    <groupId>com.palantir</groupId>
-    <artifactId>parent</artifactId>
+    <groupId>com.palantir.tslint</groupId>
+    <artifactId>tslint-parent</artifactId>
     <version>1.0.1.qualifier</version>
   </parent>
 
